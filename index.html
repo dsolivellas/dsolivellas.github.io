@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador COCOMO Intermedio – Caso MediConnect</title>
+  <style>
+    :root {
+      --bg-page: #f3f6f9;
+      --bg-card: #ffffff;
+      --bg-subtle: #f8fafc;
+      --bg-case: #eef4fa;
+      --border-case: #2b6cb0;
+      --primary: #1e3a5f;
+      --primary-hover: #152a45;
+      --accent: #0f766e;
+      --accent-soft: #e6f4f1;
+      --text-main: #1e293b;
+      --text-muted: #475569;
+      --border-color: #cbd5e1;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --radius: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    header.page-header {
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .badge-course {
+      display: inline-block;
+      background-color: var(--primary);
+      color: #ffffff;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    header.page-header h1 {
+      margin: 0 0 6px;
+      font-size: 1.75rem;
+      color: var(--primary);
+      line-height: 1.25;
+    }
+
+    header.page-header p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.98rem;
+    }
+
+    /* Recuadro Caso de Estudio */
+    .case-study-box {
+      background-color: var(--bg-case);
+      border-left: 5px solid var(--border-case);
+      border-top: 1px solid #bfdbfe;
+      border-right: 1px solid #bfdbfe;
+      border-bottom: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .case-study-box h2 {
+      margin: 0 0 10px;
+      font-size: 1.15rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .case-study-box p {
+      margin: 0;
+      font-size: 0.98rem;
+      color: #1e293b;
+    }
+
+    /* Botón y Panel Límites del Modelo */
+    .limits-wrapper {
+      margin-bottom: 24px;
+    }
+
+    .btn-limits {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-card);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+
+    .btn-limits:hover,
+    .btn-limits:focus-visible {
+      background-color: var(--primary);
+      color: #ffffff;
+      outline: none;
+    }
+
+    .btn-limits .chevron {
+      display: inline-block;
+      transition: transform 0.2s ease;
+    }
+
+    .btn-limits[aria-expanded="true"] .chevron {
+      transform: rotate(180deg);
+    }
+
+    .limits-panel {
+      margin-top: 12px;
+      background-color: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 4px solid #d97706;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      color: #78350f;
+      font-size: 0.95rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .limits-panel[hidden] {
+      display: none;
+    }
+
+    /* Resultados en Tiempo Real */
+    .results-section {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .results-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .results-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    .btn-reset {
+      background-color: var(--bg-subtle);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-reset:hover,
+    .btn-reset:focus-visible {
+      background-color: #e2e8f0;
+      outline: none;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .kpi-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background-color: var(--accent-soft);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .kpi-content {
+      flex: 1;
+    }
+
+    .kpi-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 2px;
+    }
+
+    .kpi-value-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .kpi-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1.1;
+    }
+
+    .kpi-unit {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .kpi-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .formula-trace {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      overflow-x: auto;
+    }
+
+    .formula-trace code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Layout Principal: Factores Fijos y Atributos del Personal */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card > h2 {
+      margin: 0 0 6px;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    .card-desc {
+      margin: 0 0 18px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Factores Fijos */
+    .factor-group {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .factor-group:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .factor-group h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--accent);
+      background-color: var(--accent-soft);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .factor-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .factor-list li {
+      font-size: 0.92rem;
+      color: var(--text-main);
+      padding: 6px 10px;
+      background-color: var(--bg-subtle);
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Controles Interactivos: Atributos del Personal */
+    .personnel-card {
+      border-top: 4px solid var(--accent);
+    }
+
+    .control-group {
+      margin-bottom: 16px;
+      padding: 14px;
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .control-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .control-header label {
+      font-weight: 600;
+      font-size: 0.96rem;
+      color: var(--text-main);
+    }
+
+    .selected-pill {
+      background-color: var(--primary);
+      color: #ffffff;
+      font-size: 0.84rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text-main);
+      background-color: #ffffff;
+      border: 1.5px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    select:hover {
+      border-color: var(--primary);
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.18);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <span class="badge-course">Ingeniería de Software II · Licenciatura en Ciencias de la Computación</span>
+      <h1>Simulador de Estimación COCOMO Intermedio</h1>
+      <p>Análisis de sensibilidad de los atributos conductores de costo del personal sobre el Factor de Ajuste de Esfuerzo (FAE).</p>
+    </header>
+
+    <!-- Caso de estudio destacado -->
+    <section class="case-study-box" aria-labelledby="titulo-caso">
+      <h2 id="titulo-caso">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        Caso de Estudio: Proyecto MediConnect
+      </h2>
+      <p>
+        “Eres el líder de una empresa de software. Una red de 15 clínicas regionales te ha contratado para desarrollar <em>MediConnect</em>, un sistema web y móvil que permitirá a los pacientes realizar un auto-triaje de síntomas, agendar citas y acceder a sus historiales médicos básicos. El cliente quiere un MVP (Producto Mínimo Viable) en 6 meses. Tu tarea es estimar el esfuerzo, el tiempo y el equipo necesario, y negociar con el cliente las implicaciones de sus requisitos. Para realizar las estimaciones decides utilizar Cocomo intermedio semiacoplado, dado que es un proyecto con un tamaño y complejidad intermedia. De acuerdo a experiencias previas estimas para este proyecto un KLOC de 12 (miles de líneas de código por punto de función).”
+      </p>
+    </section>
+
+    <!-- Botón desplegable Límites del Modelo -->
+    <div class="limits-wrapper">
+      <button type="button" class="btn-limits" id="btn-limites" aria-expanded="false" aria-controls="panel-limites">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        Límites del Modelo
+        <span class="chevron" aria-hidden="true">▼</span>
+      </button>
+      <div class="limits-panel" id="panel-limites" role="region" aria-labelledby="btn-limites" hidden>
+        <strong>Alcance de la simulación:</strong> En este simulador sólo se permite la manipulación de los atributos del personal como parte de los factores de ajuste de esfuerzo (FAE). El resto de los atributos correspondientes al producto, al hardware y al proyecto se han fijado para el cálculo en valores representativos para el caso de estudio que se presenta (<em>MediConnect</em>).
+      </div>
+    </div>
+
+    <!-- Panel de Resultados en Tiempo Real -->
+    <section class="results-section" aria-labelledby="titulo-resultados" aria-live="polite">
+      <div class="results-header">
+        <h2 id="titulo-resultados">Resultados de la Estimación en Tiempo Real</h2>
+        <button type="button" class="btn-reset" id="btn-reset">Restablecer valores nominales (1.00)</button>
+      </div>
+
+      <div class="kpi-grid">
+        <!-- Esfuerzo -->
+        <div class="kpi-card">
+          <div class="kpi-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Esfuerzo Estimado (E)</div>
+            <div class="kpi-value-row">
+              <span class="kpi-number" id="res-esfuerzo">71</span>
+              <span class="kpi-unit">Personas-Mes</span>
+            </div>
+            <div class="kpi-sub" id="sub-esfuerzo">Valor exacto: 71.33 PM</div>
+          </div>
+        </div>
+
+        <!-- Duración -->
+        <div class="kpi-card">
+          <div class="kpi-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Duración Estimada (D)</div>
+            <div class="kpi-value-row">
+              <span class="kpi-number" id="res-duracion">13</span>
+              <span class="kpi-unit">Meses</span>
+            </div>
+            <div class="kpi-sub" id="sub-duracion">Valor exacto: 12.65 meses (Meta cliente: 6 meses)</div>
+          </div>
+        </div>
+
+        <!-- Personal Necesario -->
+        <div class="kpi-card">
+          <div class="kpi-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="kpi-content">
+            <div class="kpi-label">Personal Necesario (N)</div>
+            <div class="kpi-value-row">
+              <span class="kpi-number" id="res-personal">6</span>
+              <span class="kpi-unit">Personas</span>
+            </div>
+            <div class="kpi-sub" id="sub-personal">Valor exacto: 5.64 personas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="formula-trace" id="formula-trace">
+        Cálculo activo: <code>E = 40.76 × 1.75 × 1.00 × 1.00 × 1.00 × 1.00 × 1.00 = 71.33</code> |
+        <code>D = 2.5 × (71.33)^0.35= 11.13</code> |
+        <code>N = 71.33 / 11.13 = 5.64</code>
+      </div>
+    </section>
+
+    <!-- Sección de dos columnas: Atributos Fijos vs Atributos del Personal -->
+    <div class="main-grid">
+      <!-- Columna 1: Atributos Fijos por Categoría -->
+      <section class="card" aria-labelledby="titulo-fijos">
+        <h2 id="titulo-fijos">Factores de Ajuste de Esfuerzo (Fijos)</h2>
+        <p class="card-desc">Valores definidos para el contexto técnico y operativo de <em>MediConnect</em>:</p>
+
+        <div class="factor-group">
+          <h3>Atributos del Producto</h3>
+          <ul class="factor-list">
+            <li><strong>Fiabilidad (FI): 1.45</strong> (Muy alto, es un sistema crítico)</li>
+            <li><strong>Tamaño de base de datos (BD): 1.08</strong> (Alto, almacena datos de muchos pacientes)</li>
+            <li><strong>Complejidad del producto (CP): 1.15</strong> (Alto, hay que priorizar pacientes)</li>
+          </ul>
+        </div>
+
+        <div class="factor-group">
+          <h3>Atributos del Hardware</h3>
+          <ul class="factor-list">
+            <li><strong>Restricción de tiempo de ejecución (TM): 1.11</strong> (Alto, debe procesar el triaje y dar una respuesta en menos de 2 segundos)</li>
+            <li><strong>Restricción de almacenamiento (ST): 1.06</strong> (Alto, debe funcionar en dispositivos de baja gama)</li>
+            <li><strong>Volatilidad de la máquina virtual (VM): 1.00</strong> (Nominal, no se prevén cambios)</li>
+            <li><strong>Tiempo de respuesta del computador (TR): 1.00</strong> (Nominal, adaptado a los tiempos modernos).</li>
+          </ul>
+        </div>
+
+        <div class="factor-group">
+          <h3>Atributos del Proyecto</h3>
+          <ul class="factor-list">
+            <li><strong>Uso de prácticas modernas (PM): 0.91</strong> (Alto, se aplicará desarrollo guiado por pruebas)</li>
+            <li><strong>Uso de herramientas de software (UH): 0.91</strong> (Alto, usarán asistentes de IA)</li>
+            <li><strong>Calendario de desarrollo requerido (CD): 1.00</strong> (Nominal, hay un plazo prefijado por el cliente)</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Columna 2: Atributos del Personal (Interactivos) -->
+      <section class="card personnel-card" aria-labelledby="titulo-personal">
+        <h2 id="titulo-personal">Atributos del Personal (Interactivos)</h2>
+        <p class="card-desc">Seleccioná el multiplicador correspondiente al perfil del equipo de desarrollo:</p>
+
+        <!-- CA -->
+        <div class="control-group">
+          <div class="control-header">
+            <label for="select-ca">Capacidad del analista (CA)</label>
+            <span class="selected-pill" id="val-ca">Seleccionado: 1.00</span>
+          </div>
+          <select id="select-ca">
+            <option value="1.46">1.46 (Muy bajo)</option>
+            <option value="1.19">1.19 (Bajo)</option>
+            <option value="1.00" selected>1.00 (Nominal)</option>
+            <option value="0.86">0.86 (Alto)</option>
+            <option value="0.71">0.71 (Muy alto)</option>
+          </select>
+        </div>
+
+        <!-- EXP -->
+        <div class="control-group">
+          <div class="control-header">
+            <label for="select-exp">Experiencia en la aplicación (EXP)</label>
+            <span class="selected-pill" id="val-exp">Seleccionado: 1.00</span>
+          </div>
+          <select id="select-exp">
+            <option value="1.29">1.29 (Muy bajo)</option>
+            <option value="1.13">1.13 (Bajo)</option>
+            <option value="1.00" selected>1.00 (Nominal)</option>
+            <option value="0.91">0.91 (Alto)</option>
+            <option value="0.82">0.82 (Muy alto)</option>
+          </select>
+        </div>
+
+        <!-- CAP -->
+        <div class="control-group">
+          <div class="control-header">
+            <label for="select-cap">Capacidad del programador (CAP)</label>
+            <span class="selected-pill" id="val-cap">Seleccionado: 1.00</span>
+          </div>
+          <select id="select-cap">
+            <option value="1.24">1.24 (Muy bajo)</option>
+            <option value="1.17">1.17 (Bajo)</option>
+            <option value="1.00" selected>1.00 (Nominal)</option>
+            <option value="0.86">0.86 (Alto)</option>
+          </select>
+        </div>
+
+        <!-- VEXP -->
+        <div class="control-group">
+          <div class="control-header">
+            <label for="select-vexp">Experiencia en máquina virtual (VEXP)</label>
+            <span class="selected-pill" id="val-vexp">Seleccionado: 1.00</span>
+          </div>
+          <select id="select-vexp">
+            <option value="1.21">1.21 (Muy bajo)</option>
+            <option value="1.10">1.10 (Bajo)</option>
+            <option value="1.00" selected>1.00 (Nominal)</option>
+            <option value="0.90">0.90 (Alto)</option>
+          </select>
+        </div>
+
+        <!-- LEXP -->
+        <div class="control-group">
+          <div class="control-header">
+            <label for="select-lexp">Experiencia en el lenguaje (LEXP)</label>
+            <span class="selected-pill" id="val-lexp">Seleccionado: 1.00</span>
+          </div>
+          <select id="select-lexp">
+            <option value="1.14">1.14 (Muy bajo)</option>
+            <option value="1.07">1.07 (Bajo)</option>
+            <option value="1.00" selected>1.00 (Nominal)</option>
+            <option value="0.95">0.95 (Alto)</option>
+          </select>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      // Referencias a los selectores de Atributos del Personal
+      const selectCA = document.getElementById("select-ca");
+      const selectEXP = document.getElementById("select-exp");
+      const selectCAP = document.getElementById("select-cap");
+      const selectVEXP = document.getElementById("select-vexp");
+      const selectLEXP = document.getElementById("select-lexp");
+
+      // Referencias a las etiquetas visuales del valor seleccionado
+      const badgeCA = document.getElementById("val-ca");
+      const badgeEXP = document.getElementById("val-exp");
+      const badgeCAP = document.getElementById("val-cap");
+      const badgeVEXP = document.getElementById("val-vexp");
+      const badgeLEXP = document.getElementById("val-lexp");
+
+      // Referencias a los elementos de salida
+      const outEsfuerzo = document.getElementById("res-esfuerzo");
+      const outDuracion = document.getElementById("res-duracion");
+      const outPersonal = document.getElementById("res-personal");
+
+      const subEsfuerzo = document.getElementById("sub-esfuerzo");
+      const subDuracion = document.getElementById("sub-duracion");
+      const subPersonal = document.getElementById("sub-personal");
+      const formulaTrace = document.getElementById("formula-trace");
+
+      // Botón restablecer y botón desplegable Límites del Modelo
+      const btnReset = document.getElementById("btn-reset");
+      const btnLimites = document.getElementById("btn-limites");
+      const panelLimites = document.getElementById("panel-limites");
+
+      function actualizarSimulacion() {
+        // 1. Obtener valores numéricos seleccionados
+        const ca = parseFloat(selectCA.value);
+        const exp = parseFloat(selectEXP.value);
+        const cap = parseFloat(selectCAP.value);
+        const vexp = parseFloat(selectVEXP.value);
+        const lexp = parseFloat(selectLEXP.value);
+
+        // Actualizar indicadores visuales junto a cada lista desplegable
+        badgeCA.textContent = "Seleccionado: " + ca.toFixed(2);
+        badgeEXP.textContent = "Seleccionado: " + exp.toFixed(2);
+        badgeCAP.textContent = "Seleccionado: " + cap.toFixed(2);
+        badgeVEXP.textContent = "Seleccionado: " + vexp.toFixed(2);
+        badgeLEXP.textContent = "Seleccionado: " + lexp.toFixed(2);
+
+        // 2. Aplicar exactamente las tres fórmulas especificadas
+        // Fórmula 1: E = 40.76 * 1.75 * CA * EXP * CAP * VEXP * LEXP
+        const E = 40.76 * 1.75 * ca * exp * cap * vexp * lexp;
+
+        // Fórmula 2: D = 2.5 * E ^ 0.35
+        const D = 2.5 * Math.pow(E, 0.35);
+
+        // Fórmula 3: N = E / D
+        const N = E / D;
+
+        // 3. Mostrar resultados redondeados a entero
+        outEsfuerzo.textContent = Math.round(E);
+        outDuracion.textContent = Math.round(D);
+        outPersonal.textContent = Math.round(N);
+
+        // Detalle con dos decimales y traza de cálculo
+        subEsfuerzo.textContent = "Valor exacto: " + E.toFixed(2) + " PM";
+        subDuracion.textContent = "Valor exacto: " + D.toFixed(2) + " meses (Meta cliente: 6 meses)";
+        subPersonal.textContent = "Valor exacto: " + N.toFixed(2) + " personas";
+
+        formulaTrace.innerHTML =
+          "Cálculo activo: <code>E = 40.76 × 1.75 × " +
+          ca.toFixed(2) + " × " +
+          exp.toFixed(2) + " × " +
+          cap.toFixed(2) + " × " +
+          vexp.toFixed(2) + " × " +
+          lexp.toFixed(2) + " = " + E.toFixed(2) +
+          "</code> | <code>D = 2.5 × (" + E.toFixed(2) + ")^0.35 = " + D.toFixed(2) +
+          "</code> | <code>N = " + E.toFixed(2) + " / " + D.toFixed(2) + " = " + N.toFixed(2) + "</code>";
+      }
+
+      // Escuchar cambios en las 5 listas desplegables
+      [selectCA, selectEXP, selectCAP, selectVEXP, selectLEXP].forEach(function (select) {
+        select.addEventListener("change", actualizarSimulacion);
+      });
+
+      // Restablecer todos los selectores a 1.00
+      btnReset.addEventListener("click", function () {
+        selectCA.value = "1.00";
+        selectEXP.value = "1.00";
+        selectCAP.value = "1.00";
+        selectVEXP.value = "1.00";
+        selectLEXP.value = "1.00";
+        actualizarSimulacion();
+      });
+
+      // Alternar visibilidad del apartado "Límites del Modelo"
+      btnLimites.addEventListener("click", function () {
+        const estaAbierto = btnLimites.getAttribute("aria-expanded") === "true";
+        btnLimites.setAttribute("aria-expanded", String(!estaAbierto));
+        panelLimites.hidden = estaAbierto;
+      });
+
+      // Inicializar cálculo al cargar la página
+      actualizarSimulacion();
+    })();
+  </script>
+</body>
+</html>
